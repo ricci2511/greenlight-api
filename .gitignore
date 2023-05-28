@@ -22,3 +22,9 @@ go.work
 
 # macOS stuff
 .DS_Store
+
+# env vars file
+.env
+
+# local psql docker container data
+/data

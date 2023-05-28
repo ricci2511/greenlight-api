@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:latest
+    container_name: greenlight-psql
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      # set these env variables in a .env file in the same directory as this file
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: greenlight
+    volumes:
+      - ./data:/var/lib/postgresql/data
