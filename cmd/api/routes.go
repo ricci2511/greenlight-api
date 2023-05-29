@@ -22,6 +22,8 @@ func (app *application) routes() http.Handler {
 	r.Route("/v1/movies", func(r chi.Router) {
 		r.Post("/", app.createMovieHandler)
 		r.Get("/{id}", app.showMovieHandler)
+		r.Put("/{id}", app.updateMovieHandler)
+		r.Delete("/{id}", app.deleteMovieHandler)
 	})
 
 	return r
