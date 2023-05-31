@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"greenlight.ricci2511.dev/internal/validator"
 )
 
 // Helper to retrieve the id parameter from the request URL.
@@ -113,4 +115,50 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst any
 	}
 
 	return nil
+}
+
+// Helper to read a specific string parameter from a url query string.
+//
+// Returns the provided default value if the parameter is not found.
+func (app *application) readString(qs url.Values, key, defaultValue string) string {
+	s := qs.Get(key)
+
+	if s == "" {
+		return defaultValue
+	}
+
+	return s
+}
+
+// Helper to read the csv string from a url query and return it as a slice of strings.
+//
+// Returns the provided default value if the parameter is not found.
+func (app *application) readCSV(qs url.Values, key string, defaultValue []string) []string {
+	csv := qs.Get(key)
+
+	if csv == "" {
+		return defaultValue
+	}
+
+	return strings.Split(csv, ",")
+}
+
+// Helper to read a specific integer parameter from a url query string.
+// A validator instance is passed to add a validation error if the paremeter is an invalid integer.
+//
+// Returns the provided default value if the parameter is not found or invalid.
+func (app *application) readInt(qs url.Values, key string, defaultValue int, v *validator.Validator) int {
+	s := qs.Get(key)
+
+	if s == "" {
+		return defaultValue
+	}
+
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		v.AddError(key, "must be an integer value")
+		return defaultValue
+	}
+
+	return i
 }
