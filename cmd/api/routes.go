@@ -16,6 +16,7 @@ func (app *application) routes() http.Handler {
 
 	// Standard middleware stack.
 	r.Use(middleware.CleanPath)
+	r.Use(app.recoverPanic)
 
 	r.Get("/v1/healthcheck", app.healthcheckHandler)
 

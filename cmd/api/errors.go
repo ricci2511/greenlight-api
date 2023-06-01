@@ -5,9 +5,11 @@ import (
 	"net/http"
 )
 
-// Will be extended later on.
 func (app *application) logError(r *http.Request, err error) {
-	app.logger.Print(err)
+	app.logger.PrintError(err, map[string]string{
+		"requestMethod": r.Method,
+		"requestURL":    r.URL.String(),
+	})
 }
 
 // Helper to send JSON-formatted error messages to the client.
