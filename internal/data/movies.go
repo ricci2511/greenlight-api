@@ -71,9 +71,9 @@ func (m MovieModel) Get(id int64) (*Movie, error) {
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrRecordNotFound
-		} else {
-			return nil, err
 		}
+
+		return nil, err
 	}
 
 	return &movie, nil
@@ -97,9 +97,9 @@ func (m MovieModel) Update(movie *Movie) error {
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return ErrEditConflict
-		} else {
-			return err
 		}
+
+		return err
 	}
 
 	return nil
