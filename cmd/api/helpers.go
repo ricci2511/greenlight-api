@@ -162,3 +162,22 @@ func (app *application) readInt(qs url.Values, key string, defaultValue int, v *
 
 	return i
 }
+
+// Helper to run a function in a background goroutine.
+func (app *application) background(fn func()) {
+	app.wg.Add(1)
+
+	go func() {
+		defer app.wg.Done()
+
+		// Background goroutines won't trigger the recoverPanic() middleware, therefore
+		// we need to manually catch any panic and log it instead of terminating the app.
+		defer func() {
+			if err := recover(); err != nil {
+				app.logger.PrintError(fmt.Errorf("%s", err), nil)
+			}
+		}()
+
+		fn()
+	}()
+}

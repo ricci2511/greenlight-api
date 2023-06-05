@@ -31,7 +31,7 @@ func (app *application) serve() error {
 		// Block until a signal is received.
 		s := <-quit
 
-		// Once a signal is received, log it and shutdown.
+		// Once a signal is received, log it and start shutdown.
 		app.logger.PrintInfo("shutting down server", map[string]string{
 			"signal": s.String(),
 		})
@@ -39,8 +39,20 @@ func (app *application) serve() error {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
-		// Will be nil if the server was shutdown gracefully.
-		shutdownError <- srv.Shutdown(ctx)
+		err := srv.Shutdown(ctx)
+		if err != nil {
+			shutdownError <- err
+		}
+
+		app.logger.PrintInfo("completing background tasks", map[string]string{
+			"addr": srv.Addr,
+		})
+
+		// Block until all background goroutines have completed.
+		app.wg.Wait()
+
+		// Send nil to shutdownError channel to indicate a graceful shutdown.
+		shutdownError <- nil
 	}()
 
 	app.logger.PrintInfo("starting server", map[string]string{

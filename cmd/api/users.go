@@ -53,6 +53,15 @@ func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	// Send the user a welcome email after they successfully register.
+	// Runs concurrently to avoid bottlenecking the main request.
+	app.background(func() {
+		err = app.mailer.Send(user.Email, "user_welcome.html", user)
+		if err != nil {
+			app.logger.PrintError(err, nil)
+		}
+	})
+
 	err = app.writeJSON(w, http.StatusCreated, envelope{"user": user}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)

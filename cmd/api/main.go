@@ -3,16 +3,18 @@ package main
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"flag"
+	"fmt"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"greenlight.ricci2511.dev/internal/data"
 	"greenlight.ricci2511.dev/internal/jsonlog"
+	"greenlight.ricci2511.dev/internal/mailer"
 )
 
 // Hardcoded for now,
@@ -33,6 +35,13 @@ type config struct {
 		burst   int
 		enabled bool
 	}
+	smtp struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
+	}
 }
 
 // Holds application-wide dependencies.
@@ -40,6 +49,8 @@ type application struct {
 	config config
 	logger *jsonlog.Logger
 	models data.Models
+	mailer mailer.Mailer
+	wg     sync.WaitGroup
 }
 
 func main() {
@@ -62,6 +73,7 @@ func main() {
 		config: cfg,
 		logger: logger,
 		models: data.NewModels(db),
+		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
 	}
 
 	err = app.serve()
@@ -72,10 +84,10 @@ func main() {
 
 func parseFlags() (config, error) {
 	var cfg config
-	dsn, err := getDsn()
+	env, err := getEnvVars()
 
-	if err != nil || dsn == "" {
-		return cfg, errors.New("make sure a valid GREENLIGHT_DB_DSN environment variable is set in a .env file at the root of the project")
+	if err != nil {
+		return cfg, fmt.Errorf("failed to read environment variables: %s", err.Error())
 	}
 
 	// Server settings.
@@ -83,7 +95,7 @@ func parseFlags() (config, error) {
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 
 	// Database settings.
-	flag.StringVar(&cfg.db.dsn, "db-dsn", dsn, "PostgreSQL DSN")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", env["GREENLIGHT_DB_DSN"], "PostgreSQL DSN")
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")
 	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQL max connection idle time (duration)")
@@ -93,18 +105,25 @@ func parseFlags() (config, error) {
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
 
+	// SMTP settings.
+	flag.StringVar(&cfg.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP server hostname")
+	flag.IntVar(&cfg.smtp.port, "smtp-port", 2525, "SMTP server port")
+	flag.StringVar(&cfg.smtp.username, "smtp-username", env["SMTP_USERNAME"], "SMTP username")
+	flag.StringVar(&cfg.smtp.password, "smtp-password", env["SMTP_PASSWORD"], "SMTP password")
+	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Greenlight <no-reply@greenlight.ricci2511.dev>", "SMTP sender")
+
 	flag.Parse()
 
 	return cfg, nil
 }
 
-func getDsn() (string, error) {
+func getEnvVars() (map[string]string, error) {
 	envMap, err := godotenv.Read()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return envMap["GREENLIGHT_DB_DSN"], nil
+	return envMap, nil
 }
 
 func openDb(cfg config) (*sql.DB, error) {
