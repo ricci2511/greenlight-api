@@ -23,6 +23,7 @@ func (app *application) routes() http.Handler {
 
 	r.Route("/v1/users", func(r chi.Router) {
 		r.Post("/", app.createUserHandler)
+		r.Put("/activate", app.activateUserHandler)
 	})
 
 	r.Route("/v1/movies", func(r chi.Router) {

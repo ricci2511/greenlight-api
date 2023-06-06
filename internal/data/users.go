@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"time"
@@ -166,4 +167,43 @@ func (m UserModel) Update(user *User) error {
 	}
 
 	return nil
+}
+
+func (m UserModel) GetForToken(scope, tokenPlaintext string) (*User, error) {
+	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
+
+	query := `
+		SELECT users.id, users.created_at, users.name, users.email, users.password_hash, users.activated, users.version
+		FROM users
+		INNER JOIN tokens
+		ON users.id = tokens.user_id
+		WHERE tokens.hash = $1 AND tokens.scope = $2 AND tokens.expiry > $3`
+
+	// 32 bytes token hash array is converted to a slice since the pq driver does not support arrays.
+	args := []any{tokenHash[:], scope, time.Now()}
+
+	var user User
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
+		&user.ID,
+		&user.CreatedAt,
+		&user.Name,
+		&user.Email,
+		&user.Password.hash,
+		&user.Activated,
+		&user.Version,
+	)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrRecordNotFound
+		}
+
+		return nil, err
+	}
+
+	return &user, nil
 }
