@@ -32,6 +32,9 @@ func (app *application) routes() http.Handler {
 	})
 
 	r.Route("/v1/movies", func(r chi.Router) {
+		// Any /v1/movies request requires an activated user.
+		r.Use(app.requireActivatedUser)
+
 		r.Post("/", app.createMovieHandler)
 		r.Get("/", app.listMoviesHandler)
 		r.Get("/{id}", app.showMovieHandler)
