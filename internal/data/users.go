@@ -15,6 +15,9 @@ var (
 	ErrDuplicateEmail = errors.New("duplicate email")
 )
 
+// A user is considered anonymous if no Authorization header is provided with their request.
+var AnonymousUser = &User{}
+
 type User struct {
 	ID        int64     `json:"id"`
 	CreatedAt time.Time `json:"createdAt"`
@@ -28,6 +31,10 @@ type User struct {
 type password struct {
 	plaintext *string
 	hash      []byte
+}
+
+func (u *User) IsAnonymous() bool {
+	return u == AnonymousUser
 }
 
 // Hashes the provided plaintext password and stores both the plaintext and hash in the password struct.

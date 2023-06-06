@@ -17,6 +17,7 @@ func (app *application) routes() http.Handler {
 	// Standard middleware stack.
 	r.Use(app.recoverPanic)
 	r.Use(app.rateLimit)
+	r.Use(app.authenticate)
 	r.Use(middleware.CleanPath)
 
 	r.Get("/v1/healthcheck", app.healthcheckHandler)
@@ -24,6 +25,10 @@ func (app *application) routes() http.Handler {
 	r.Route("/v1/users", func(r chi.Router) {
 		r.Post("/", app.createUserHandler)
 		r.Put("/activate", app.activateUserHandler)
+	})
+
+	r.Route("/v1/tokens", func(r chi.Router) {
+		r.Post("/authentication", app.createAuthenticationTokenHandler)
 	})
 
 	r.Route("/v1/movies", func(r chi.Router) {
