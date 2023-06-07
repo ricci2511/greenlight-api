@@ -32,14 +32,12 @@ func (app *application) routes() http.Handler {
 	})
 
 	r.Route("/v1/movies", func(r chi.Router) {
-		// Any /v1/movies request requires an activated user.
-		r.Use(app.requireActivatedUser)
+		r.Post("/", app.requirePermission("movies:write", app.createMovieHandler))
+		r.Get("/", app.requirePermission("movies:read", app.listMoviesHandler))
 
-		r.Post("/", app.createMovieHandler)
-		r.Get("/", app.listMoviesHandler)
-		r.Get("/{id}", app.showMovieHandler)
-		r.Patch("/{id}", app.updateMovieHandler)
-		r.Delete("/{id}", app.deleteMovieHandler)
+		r.Get("/{id}", app.requirePermission("movies:read", app.showMovieHandler))
+		r.Patch("/{id}", app.requirePermission("movies:write", app.updateMovieHandler))
+		r.Delete("/{id}", app.requirePermission("movies:write", app.deleteMovieHandler))
 	})
 
 	return r

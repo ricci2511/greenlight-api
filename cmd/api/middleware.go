@@ -149,7 +149,7 @@ func (app *application) requireAuthenticatedUser(next http.HandlerFunc) http.Han
 	})
 }
 
-func (app *application) requireActivatedUser(next http.Handler) http.Handler {
+func (app *application) requireActivatedUser(next http.Handler) http.HandlerFunc {
 	fn := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user := app.contextGetUser(r)
 
@@ -164,4 +164,26 @@ func (app *application) requireActivatedUser(next http.Handler) http.Handler {
 	// To check if a user is activated, we first need to check if they are authenticated.
 	// So we wrap this middleware in the requireAuthenticatedUser() middleware.
 	return app.requireAuthenticatedUser(fn)
+}
+
+func (app *application) requirePermission(code string, next http.HandlerFunc) http.HandlerFunc {
+	fn := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := app.contextGetUser(r)
+
+		permissions, err := app.models.Permissions.GetAllForUser(user.ID)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+
+		if !permissions.Include(code) {
+			app.notPermittedResponse(w, r)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+
+	// Before this middleware runs, we need to ensure that the user is authenticated and activated.
+	return app.requireActivatedUser(fn)
 }
