@@ -15,10 +15,11 @@ func (app *application) routes() http.Handler {
 	r.MethodNotAllowed(app.methodNotAllowedRespone)
 
 	// Standard middleware stack.
-	r.Use(app.recoverPanic)
-	r.Use(app.rateLimit)
-	r.Use(app.authenticate)
 	r.Use(middleware.CleanPath)
+	r.Use(app.authenticate)
+	r.Use(app.rateLimit)
+	r.Use(app.enableCors)
+	r.Use(app.recoverPanic)
 
 	r.Get("/v1/healthcheck", app.healthcheckHandler)
 

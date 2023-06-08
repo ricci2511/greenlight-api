@@ -187,3 +187,36 @@ func (app *application) requirePermission(code string, next http.HandlerFunc) ht
 	// Before this middleware runs, we need to ensure that the user is authenticated and activated.
 	return app.requireActivatedUser(fn)
 }
+
+func (app *application) enableCors(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Vary", "Origin")
+		w.Header().Add("Vary", "Access-Control-Request-Method")
+
+		origin := r.Header.Get("Origin")
+
+		// Check if the origin header is set and is trusted for CORS.
+		if origin != "" {
+			for _, trustedOrigin := range app.config.cors.trustedOrigins {
+				if origin == trustedOrigin {
+					w.Header().Set("Access-Control-Allow-Origin", origin)
+
+					// If it passes these checks, treat it as a preflight request.
+					if r.Method == http.MethodOptions && r.Header.Get("Access-Control-Request-Method") != "" {
+						// Set necessary headers for preflight requests.
+						// https://developer.mozilla.org/en-US/docs/Glossary/Preflight_request
+						w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, PUT, PATCH, DELETE")
+						w.Header().Set("Access-Control-Allow-Headers", "Authorization, Content-Type")
+
+						w.WriteHeader(http.StatusOK)
+						return
+					}
+
+					break
+				}
+			}
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
