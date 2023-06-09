@@ -1,6 +1,7 @@
 package main
 
 import (
+	"expvar"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -20,6 +21,7 @@ func (app *application) routes() http.Handler {
 	r.Use(app.rateLimit)
 	r.Use(app.enableCors)
 	r.Use(app.recoverPanic)
+	r.Use(app.metrics)
 
 	r.Get("/v1/healthcheck", app.healthcheckHandler)
 
@@ -40,6 +42,8 @@ func (app *application) routes() http.Handler {
 		r.Patch("/{id}", app.requirePermission("movies:write", app.updateMovieHandler))
 		r.Delete("/{id}", app.requirePermission("movies:write", app.deleteMovieHandler))
 	})
+
+	r.Mount("/debug/vars", expvar.Handler())
 
 	return r
 }
