@@ -20,6 +20,9 @@ func (app *application) routes() http.Handler {
 	r.Use(app.authenticate)
 	r.Use(app.rateLimit)
 	r.Use(app.enableCors)
+	// Get client's real IP through the X-Forwarded-For header set by Caddy's reverse proxy.
+	// If not used, the rate limiter will limit the ip of the reverse proxy instead of the client.
+	r.Use(middleware.RealIP)
 	r.Use(app.recoverPanic)
 	r.Use(app.metrics)
 

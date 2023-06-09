@@ -6,14 +6,12 @@ import (
 	"expvar"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"runtime"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"greenlight.ricci2511.dev/internal/data"
 	"greenlight.ricci2511.dev/internal/jsonlog"
@@ -60,10 +58,7 @@ type application struct {
 }
 
 func main() {
-	cfg, err := parseFlags()
-	if err != nil {
-		log.Fatal(err)
-	}
+	cfg := parseFlags()
 
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 
@@ -91,20 +86,15 @@ func main() {
 	}
 }
 
-func parseFlags() (config, error) {
+func parseFlags() config {
 	var cfg config
-	env, err := getEnvVars()
-
-	if err != nil {
-		return cfg, fmt.Errorf("failed to read environment variables: %s", err.Error())
-	}
 
 	// Server settings.
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 
 	// Database settings.
-	flag.StringVar(&cfg.db.dsn, "db-dsn", env["GREENLIGHT_DB_DSN"], "PostgreSQL DSN")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", "", "PostgreSQL DSN")
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")
 	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQL max connection idle time (duration)")
@@ -117,8 +107,8 @@ func parseFlags() (config, error) {
 	// SMTP settings.
 	flag.StringVar(&cfg.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP server hostname")
 	flag.IntVar(&cfg.smtp.port, "smtp-port", 2525, "SMTP server port")
-	flag.StringVar(&cfg.smtp.username, "smtp-username", env["SMTP_USERNAME"], "SMTP username")
-	flag.StringVar(&cfg.smtp.password, "smtp-password", env["SMTP_PASSWORD"], "SMTP password")
+	flag.StringVar(&cfg.smtp.username, "smtp-username", "", "SMTP username")
+	flag.StringVar(&cfg.smtp.password, "smtp-password", "", "SMTP password")
 	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Greenlight <no-reply@greenlight.ricci2511.dev>", "SMTP sender")
 
 	// CORS settings.
@@ -127,18 +117,17 @@ func parseFlags() (config, error) {
 		return nil
 	})
 
+	// Version display.
+	displayVersion := flag.Bool("version", false, "Display version and exit")
+
 	flag.Parse()
 
-	return cfg, nil
-}
-
-func getEnvVars() (map[string]string, error) {
-	envMap, err := godotenv.Read()
-	if err != nil {
-		return nil, err
+	if *displayVersion {
+		fmt.Printf("Version: %s\n", version)
+		os.Exit(0)
 	}
 
-	return envMap, nil
+	return cfg
 }
 
 func openDb(cfg config) (*sql.DB, error) {
@@ -158,7 +147,7 @@ func openDb(cfg config) (*sql.DB, error) {
 
 	db.SetConnMaxIdleTime(duration)
 
-	// init context with 5 seconds timeout, used as a deadline for the db connection.
+	// Init context with 5 seconds timeout, used as a deadline for the db connection.
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

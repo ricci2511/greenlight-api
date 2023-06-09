@@ -28,3 +28,6 @@ go.work
 
 # local psql docker container data
 /data
+
+# binaries
+/bin
