@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
-	"greenlight.ricci2511.dev/internal/validator"
+	"github.com/ricci2511/greenlight-api/internal/validator"
 )
 
 var (

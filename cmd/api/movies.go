@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"greenlight.ricci2511.dev/internal/data"
-	"greenlight.ricci2511.dev/internal/validator"
+	"github.com/ricci2511/greenlight-api/internal/data"
+	"github.com/ricci2511/greenlight-api/internal/validator"
 )
 
 func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Request) {

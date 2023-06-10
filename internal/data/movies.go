@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/lib/pq"
-	"greenlight.ricci2511.dev/internal/validator"
+	"github.com/ricci2511/greenlight-api/internal/validator"
 )
 
 // Represents a movie table in the database.

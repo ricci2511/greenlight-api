@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"golang.org/x/time/rate"
-	"greenlight.ricci2511.dev/internal/data"
-	"greenlight.ricci2511.dev/internal/validator"
+	"github.com/ricci2511/greenlight-api/internal/data"
+	"github.com/ricci2511/greenlight-api/internal/validator"
 )
 
 func (app *application) recoverPanic(next http.Handler) http.Handler {

@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
-	"greenlight.ricci2511.dev/internal/validator"
+	"github.com/ricci2511/greenlight-api/internal/validator"
 )
 
 // Helper to retrieve the id parameter from the request URL.

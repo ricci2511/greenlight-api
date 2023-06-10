@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"greenlight.ricci2511.dev/internal/data"
-	"greenlight.ricci2511.dev/internal/validator"
+	"github.com/ricci2511/greenlight-api/internal/data"
+	"github.com/ricci2511/greenlight-api/internal/validator"
 )
 
 func (app *application) createUserHandler(w http.ResponseWriter, r *http.Request) {

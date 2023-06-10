@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"greenlight.ricci2511.dev/internal/data"
+	"github.com/ricci2511/greenlight-api/internal/data"
 )
 
 type contextKey string

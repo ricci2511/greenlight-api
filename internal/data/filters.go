@@ -4,7 +4,7 @@ import (
 	"math"
 	"strings"
 
-	"greenlight.ricci2511.dev/internal/validator"
+	"github.com/ricci2511/greenlight-api/internal/validator"
 )
 
 type Filters struct {

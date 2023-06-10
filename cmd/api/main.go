@@ -13,9 +13,9 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
-	"greenlight.ricci2511.dev/internal/data"
-	"greenlight.ricci2511.dev/internal/jsonlog"
-	"greenlight.ricci2511.dev/internal/mailer"
+	"github.com/ricci2511/greenlight-api/internal/data"
+	"github.com/ricci2511/greenlight-api/internal/jsonlog"
+	"github.com/ricci2511/greenlight-api/internal/mailer"
 )
 
 // Hardcoded for now,
@@ -94,7 +94,7 @@ func parseFlags() config {
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 
 	// Database settings.
-	flag.StringVar(&cfg.db.dsn, "db-dsn", "", "PostgreSQL DSN")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("DATABASE_DSN"), "PostgreSQL DSN")
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")
 	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQL max connection idle time (duration)")
@@ -107,9 +107,9 @@ func parseFlags() config {
 	// SMTP settings.
 	flag.StringVar(&cfg.smtp.host, "smtp-host", "sandbox.smtp.mailtrap.io", "SMTP server hostname")
 	flag.IntVar(&cfg.smtp.port, "smtp-port", 2525, "SMTP server port")
-	flag.StringVar(&cfg.smtp.username, "smtp-username", "", "SMTP username")
-	flag.StringVar(&cfg.smtp.password, "smtp-password", "", "SMTP password")
-	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Greenlight <no-reply@greenlight.ricci2511.dev>", "SMTP sender")
+	flag.StringVar(&cfg.smtp.username, "smtp-username", os.Getenv("SMTP_USERNAME"), "SMTP username")
+	flag.StringVar(&cfg.smtp.password, "smtp-password", os.Getenv("SMTP_PASSWORD"), "SMTP password")
+	flag.StringVar(&cfg.smtp.sender, "smtp-sender", "Greenlight <no-reply@github.com/ricci2511/greenlight-api>", "SMTP sender")
 
 	// CORS settings.
 	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)", func(val string) error {

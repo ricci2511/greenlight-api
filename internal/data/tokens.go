@@ -8,7 +8,7 @@ import (
 	"encoding/base32"
 	"time"
 
-	"greenlight.ricci2511.dev/internal/validator"
+	"github.com/ricci2511/greenlight-api/internal/validator"
 )
 
 // Constants for each kind of token scope.

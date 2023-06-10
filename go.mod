@@ -1,4 +1,4 @@
-module greenlight.ricci2511.dev
+module github.com/ricci2511/greenlight-api
 
 go 1.20
 

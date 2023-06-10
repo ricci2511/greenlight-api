@@ -13,3 +13,16 @@ services:
       POSTGRES_DB: greenlight
     volumes:
       - ./data:/var/lib/postgresql/data
+  app:
+    build: 
+      context: .
+      dockerfile: dev.Dockerfile
+    image: greenlight-app
+    container_name: greenlight-app
+    restart: always
+    ports:
+      - 8080:4000
+    depends_on:
+      - db
+    volumes:
+      - ./:/app
