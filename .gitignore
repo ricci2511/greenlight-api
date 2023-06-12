@@ -31,3 +31,7 @@ go.work
 
 # binaries
 /bin
+
+# prod stuff
+docker-compose.prod.yml
+prod.Dockerfile

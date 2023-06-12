@@ -7,7 +7,7 @@ services:
     ports:
       - 5432:5432
     environment:
-      # set these env variables in a .env file in the same directory as this file
+      # Set these in your .env file
       POSTGRES_USER: "${POSTGRES_USER}"
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
       POSTGRES_DB: greenlight
@@ -22,6 +22,11 @@ services:
     restart: always
     ports:
       - 8080:4000
+    environment:
+      # Set these in your .env file
+      DATABASE_DSN: "${DATABASE_DSN}"
+      SMTP_USERNAME: "${SMTP_USERNAME}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD}"
     depends_on:
       - db
     volumes:

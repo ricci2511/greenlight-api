@@ -1,12 +1,9 @@
 FROM golang:alpine
 
-# Install build dependencies
-RUN apk add --no-cache make
-
 # Set the Current Working Directory inside the container
 WORKDIR /app
 
-# Install air for live reload on save
+# Install air for live server reload on save
 RUN go install github.com/cosmtrek/air@latest
 
 # Copy the Go modules and download dependencies
@@ -17,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN make build/api
+RUN go build -ldflags='-s' -o=./bin/api ./cmd/api
 
 # Expose port 4000 to the outside world
 EXPOSE 4000

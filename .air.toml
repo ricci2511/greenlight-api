@@ -5,9 +5,7 @@ tmp_dir = "tmp"
 [build]
   args_bin = []
   cmd = "make build/api"
-  # Ensure that the binary has access to the necessary environment variables defined in .env
-  # by exporting them before running the binary.
-  bin = ";export $(grep -v '^#' .env | xargs); ./bin/api"
+  bin = "./bin/api"
   delay = 0
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
   exclude_file = []

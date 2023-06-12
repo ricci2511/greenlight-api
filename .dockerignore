@@ -1,0 +1,45 @@
+# Docker files
+dev.Dockerfile
+docker-compose.dev.yml
+prod.Dockerfile
+docker-compose.prod.yml
+.dockerignore
+
+# Development and local files
+.air.toml
+.env
+.env.example
+Makefile
+
+# Local database files
+/data
+
+# Version control files and directories
+.git
+.gitignore
+
+# Editor and IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# MacOS stuff
+.DS_Store
+
+# Binaries and build artifacts
+/bin
+/build
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test and coverage files
+/test
+/coverage
+
+# Documentation and generated files
+/docs
+/generated
