@@ -31,10 +31,12 @@ func (app *application) routes() http.Handler {
 	r.Route("/v1/users", func(r chi.Router) {
 		r.Post("/", app.createUserHandler)
 		r.Put("/activate", app.activateUserHandler)
+		r.Put("/password", app.updateUserPasswordHandler)
 	})
 
 	r.Route("/v1/tokens", func(r chi.Router) {
 		r.Post("/authentication", app.createAuthenticationTokenHandler)
+		r.Post("/password-reset", app.createPasswordResetTokenHandler)
 	})
 
 	r.Route("/v1/movies", func(r chi.Router) {
