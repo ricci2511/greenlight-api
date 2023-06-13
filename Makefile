@@ -1,5 +1,7 @@
 include .env
 
+COMPOSE_FILE ?= docker-compose.dev.yml
+
 # ==================================================================================== #
 # HELPERS
 # ==================================================================================== #
@@ -26,14 +28,29 @@ run/api:
 ## db/migrations/new name=$1: create a new database migration with the given name
 .PHONY: db/migrations/new
 db/migrations/new:
-	migrate create -ext sql -dir ./migrations ${name}
+	@echo 'Creating new migration files with name ${name}...'
+	docker run --rm -v ${PWD}/migrations:/migrations migrate/migrate create -ext sql -dir /migrations -seq ${name}
 
 ## db/migrations/up: apply all up database migrations
 .PHONY: db/migrations/up
 db/migrations/up: confirm
-	docker-compose up -d
+	./wait-for-db.sh ${COMPOSE_FILE}
 	@echo 'Running up migrations...'
-	migrate -path ./migrations -database ${DATABASE_DSN} up
+	docker run --rm -v ${PWD}/migrations:/migrations --network greenlight_default migrate/migrate -path ./migrations -database ${DATABASE_DSN} up
+
+## db/migrations/down: apply all down database migrations
+.PHONY: db/migrations/down
+db/migrations/down: confirm
+	./wait-for-db.sh ${COMPOSE_FILE}
+	@echo 'Running down migrations...'
+	docker run --rm -v ${PWD}/migrations:/migrations --network greenlight_default migrate/migrate -path ./migrations -database ${DATABASE_DSN} down -all
+
+## db/migrations/force version=$1: force a specific database migration version
+.PHONY: db/migrations/force
+db/migrations/force: confirm
+	./wait-for-db.sh ${COMPOSE_FILE}
+	@echo 'Forcing migration version ${version}...'
+	docker run --rm -v ${PWD}/migrations:/migrations --network greenlight_default migrate/migrate -path ./migrations -database ${DATABASE_DSN} force ${version}
 
 # ==================================================================================== #
 # QUALITY CONTROL

@@ -28,6 +28,7 @@ go.work
 
 # local psql docker container data
 /data
+/prod-data
 
 # binaries
 /bin
