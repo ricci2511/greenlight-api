@@ -1,6 +1,6 @@
 # greenlight-api
 
-An api built with [Go](https://go.dev/) to retreive movie data, similar to something like [themoviedb](https://www.themoviedb.org/).
+An api built with [Go](https://go.dev/) to retrieve custom movie data, a simpler version of something like [themoviedb](https://www.themoviedb.org/).
 
 ## Why?
-Im just curious about learning Go and building well designed apis with it.
+Wanted to learn Go and how to build well designed apis.
